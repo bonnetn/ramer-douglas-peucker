@@ -90,35 +90,31 @@ fn main() -> Result<(), AppError> {
 
     let start = Instant::now();
     let simplified_trajectory = {
-        let mut latitudes = trajectory.latitudes;
-        let mut longitudes = trajectory.longitudes;
-        let mut timestamps = trajectory.timestamps;
-
-        let mut index = 0;
-        latitudes.retain(|_| {
-            let v = keep_points[index];
-            index += 1;
-            v
+        let mut trajectory = trajectory;
+        let mut i = 0;
+        
+        // Filter all three vectors in a single pass
+        trajectory.latitudes.retain(|_| {
+            let keep = keep_points[i];
+            i += 1;
+            keep
         });
-
-        let mut index = 0;
-        longitudes.retain(|_| {
-            let v = keep_points[index];
-            index += 1;
-            v
+        
+        i = 0;
+        trajectory.longitudes.retain(|_| {
+            let keep = keep_points[i];
+            i += 1;
+            keep
         });
-
-        let mut index = 0;
-        timestamps.retain(|_| {
-            let v = keep_points[index];
-            index += 1;
-            v
+        
+        i = 0;
+        trajectory.timestamps.retain(|_| {
+            let keep = keep_points[i];
+            i += 1;
+            keep
         });
-        Trajectory {
-            latitudes,
-            longitudes,
-            timestamps,
-        }
+        
+        trajectory
     };
     let duration = start.elapsed();
 
