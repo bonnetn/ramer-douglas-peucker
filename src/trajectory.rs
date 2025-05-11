@@ -56,7 +56,7 @@ impl Trajectory {
     /// Delta encoding stores the difference between consecutive values,
     /// which can lead to better compression for smooth trajectories.
     pub fn to_delta_proto(&self) -> proto::Trajectory {
-        let positions_x: Vec<i64> = self.latitudes.iter().copied()
+        let latitudes: Vec<i64> = self.latitudes.iter().copied()
             .scan(0_i64, |last, lat| {
                 let delta = lat - *last;
                 *last = lat;
@@ -64,7 +64,7 @@ impl Trajectory {
             })
             .collect();
 
-        let positions_y: Vec<i64> = self.longitudes.iter().copied()
+        let longitudes: Vec<i64> = self.longitudes.iter().copied()
             .scan(0_i64, |last, lon| {
                 let delta = lon - *last;
                 *last = lon;
@@ -81,8 +81,8 @@ impl Trajectory {
             .collect();
 
         proto::Trajectory {
-            positions_x,
-            positions_y,
+            latitudes,
+            longitudes,
             timestamps,
         }
     }
@@ -92,8 +92,8 @@ impl Trajectory {
     /// or when random access to coordinates is needed.
     pub fn to_proto(&self) -> proto::Trajectory {
         proto::Trajectory {
-            positions_x: self.latitudes.clone(),
-            positions_y: self.longitudes.clone(),
+            latitudes: self.latitudes.clone(),
+            longitudes: self.longitudes.clone(),
             timestamps: self.timestamps.clone(),
         }
     }
@@ -141,8 +141,8 @@ mod tests {
         let trajectory = Trajectory::new(points);
         let proto = trajectory.to_proto();
 
-        assert_eq!(proto.positions_x, vec![1_000_000, 2_000_000]);
-        assert_eq!(proto.positions_y, vec![2_000_000, 3_000_000]);
+        assert_eq!(proto.latitudes, vec![1_000_000, 2_000_000]);
+        assert_eq!(proto.longitudes, vec![2_000_000, 3_000_000]);
         assert_eq!(proto.timestamps, vec![1000, 2000]);
     }
 
@@ -155,8 +155,8 @@ mod tests {
         let trajectory = Trajectory::new(points);
         let proto = trajectory.to_delta_proto();
 
-        assert_eq!(proto.positions_x, vec![1_000_000, 1_000_000]);
-        assert_eq!(proto.positions_y, vec![2_000_000, 1_000_000]);
+        assert_eq!(proto.latitudes, vec![1_000_000, 1_000_000]);
+        assert_eq!(proto.longitudes, vec![2_000_000, 1_000_000]);
         assert_eq!(proto.timestamps, vec![1000, 1000]);
     }
 }
