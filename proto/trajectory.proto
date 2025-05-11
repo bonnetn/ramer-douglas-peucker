@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package trajectory;
+
+message Trajectory {
+  repeated sint64 positions_x = 1;
+  repeated sint64 positions_y = 2;
+  repeated uint64 timestamps = 3;
+} 
