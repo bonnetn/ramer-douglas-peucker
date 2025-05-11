@@ -127,8 +127,13 @@ fn main() -> Result<(), AppError> {
         duration = duration
     );
 
-    let protobuf_value = simplified_trajectory.to_delta_proto();
+    // Get the length before consuming the trajectory
+    let simplified_points = simplified_trajectory.latitudes.len();
+
+    // Clone the trajectory since we need to use it twice
+    let protobuf_value = simplified_trajectory.clone().to_delta_proto();
     let serialized_delta = protobuf_value.encode_to_vec();
+
     let protobuf_value = simplified_trajectory.to_proto();
     let serialized = protobuf_value.encode_to_vec();
 
@@ -154,15 +159,12 @@ fn main() -> Result<(), AppError> {
     );
     println!(
         "simplified points: {:>24} points",
-        simplified_trajectory
-            .latitudes
-            .len()
-            .to_formatted_string(&LOCALE)
+        simplified_points.to_formatted_string(&LOCALE)
     );
 
     println!(
         "Ratio points: {:>29.2} %",
-        (simplified_trajectory.latitudes.len() as f64 / total_points as f64) * 100.0
+        (simplified_points as f64 / total_points as f64) * 100.0
     );
 
     println!(

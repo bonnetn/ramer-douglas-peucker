@@ -3,6 +3,7 @@ use crate::proto;
 
 /// A trajectory represents a sequence of GPS points with their timestamps.
 /// The coordinates are stored as scaled integers for efficient storage and processing.
+#[derive(Clone)]
 pub struct Trajectory {
     /// Latitude values scaled by 10^6
     pub latitudes: Vec<i64>,
@@ -55,8 +56,10 @@ impl Trajectory {
     /// Converts the trajectory to a protobuf message using delta encoding.
     /// Delta encoding stores the difference between consecutive values,
     /// which can lead to better compression for smooth trajectories.
-    pub fn to_delta_proto(&self) -> proto::Trajectory {
-        let latitudes: Vec<i64> = self.latitudes.iter().copied()
+    /// 
+    /// This function consumes the trajectory.
+    pub fn to_delta_proto(self) -> proto::Trajectory {
+        let latitudes: Vec<i64> = self.latitudes.into_iter()
             .scan(0_i64, |last, lat| {
                 let delta = lat - *last;
                 *last = lat;
@@ -64,7 +67,7 @@ impl Trajectory {
             })
             .collect();
 
-        let longitudes: Vec<i64> = self.longitudes.iter().copied()
+        let longitudes: Vec<i64> = self.longitudes.into_iter()
             .scan(0_i64, |last, lon| {
                 let delta = lon - *last;
                 *last = lon;
@@ -72,7 +75,7 @@ impl Trajectory {
             })
             .collect();
 
-        let timestamps: Vec<u64> = self.timestamps.iter().copied()
+        let timestamps: Vec<u64> = self.timestamps.into_iter()
             .scan(0_u64, |last, ts| {
                 let delta = ts - *last;
                 *last = ts;
@@ -90,11 +93,13 @@ impl Trajectory {
     /// Converts the trajectory to a protobuf message using absolute values.
     /// This is useful when delta encoding doesn't provide good compression
     /// or when random access to coordinates is needed.
-    pub fn to_proto(&self) -> proto::Trajectory {
+    /// 
+    /// This function consumes the trajectory.
+    pub fn to_proto(self) -> proto::Trajectory {
         proto::Trajectory {
-            latitudes: self.latitudes.clone(),
-            longitudes: self.longitudes.clone(),
-            timestamps: self.timestamps.clone(),
+            latitudes: self.latitudes,
+            longitudes: self.longitudes,
+            timestamps: self.timestamps,
         }
     }
 }
